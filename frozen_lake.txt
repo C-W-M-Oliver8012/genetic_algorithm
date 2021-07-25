@@ -1,0 +1,35 @@
+HHHHHH
+HSFFFH
+HFHFHH
+HFFFHH
+HHFFGH
+HHHHHH
+
+
+
+Input 1: left F
+Input 2: left H
+Input 3: Left G
+
+Input 4: Right F
+Input 5: Right H
+Input 6: Right G
+
+Input 7: Up F
+Input 8: Up H
+Input 9: Up G
+
+Input 10: Down F
+Input 11: Down H
+Input 12: Down G
+
+Input 13: X diff from G
+Input 14: Y diff from G
+
+Output 1: Up
+Output 2: Down
+Output 3: Left
+Output 4: Right
+
+
+fitness function: 2^(8 - |x diff from G| - |y diff from G|) + total moves

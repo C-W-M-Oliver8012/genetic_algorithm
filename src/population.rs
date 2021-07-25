@@ -1,132 +1,352 @@
 use crate::nn::NN;
+use crate::frozen_lake::{FrozenLake, Direction};
 use rand;
+use std::{thread, time};
 
 pub struct Population {
-        population: Vec<NN>,
-        pop_fitness: Vec<f64>,
-        pop_size: usize,
-        generation: usize,
-        best_individual: NN,
-        best_fitness: f64,
-        has_solved: bool,
+	population: Vec<NN>,
+	pop_fitness: Vec<f64>,
+	pop_size: usize,
+	generation: usize,
+	best_individual: NN,
+	best_fitness: f64,
+	has_solved: bool,
 }
 
 impl Population {
-        pub fn new(nn_info: Vec<usize>, pop_size: usize) -> Population {
-                let mut population = Population {
-                        population: Vec::new(),
-                        pop_fitness: Vec::new(),
-                        pop_size: pop_size,
-                        generation: 0,
-                        best_individual: NN::new(nn_info.clone()),
-                        best_fitness: 0.0,
-                        has_solved: false,
-                };
+	pub fn new(nn_info: Vec<usize>, pop_size: usize) -> Population {
+		let mut population = Population {
+			population: Vec::new(),
+			pop_fitness: Vec::new(),
+			pop_size: pop_size,
+			generation: 0,
+			best_individual: NN::new(nn_info.clone()),
+			best_fitness: 0.0,
+			has_solved: false,
+		};
 
-                for _i in 0..pop_size {
-                        population.population.push(NN::new(nn_info.clone()));
-                }
+		for _i in 0..pop_size {
+			population.population.push(NN::new(nn_info.clone()));
+		}
 
-                for _i in 0..pop_size {
-                        population.pop_fitness.push(0.0);
-                }
+		for _i in 0..pop_size {
+			population.pop_fitness.push(0.0);
+		}
 
-                population
-        }
+		population
+	}
 
-        pub fn get_has_solved(&self) -> bool {
-                self.has_solved
-        }
+	pub fn get_has_solved(&self) -> bool {
+		self.has_solved
+	}
 
-        pub fn get_generation(&self) -> usize {
-                self.generation
-        }
+	pub fn get_generation(&self) -> usize {
+		self.generation
+	}
 
-        pub fn get_average_fitness(&self) -> f64 {
-                let mut total_fitness = 0.0;
+	pub fn get_average_fitness(&self) -> f64 {
+		let mut total_fitness = 0.0;
 
-                for i in 0..self.pop_size {
-                        total_fitness += self.pop_fitness[i];
-                }
+		for i in 0..self.pop_size {
+			total_fitness += self.pop_fitness[i];
+		}
 
-                total_fitness / self.pop_size as f64
-        }
+		total_fitness / self.pop_size as f64
+	}
 
-        pub fn print_best_individual(&self) {
-                self.best_individual.print_nodes();
-                self.best_individual.print_connections();
-        }
+	pub fn print_best_individual(&self) {
+		self.best_individual.print_nodes();
+		self.best_individual.print_connections();
+	}
 
-        pub fn calc_fitness(&mut self) {
-                for i in 0..self.pop_size {
-                        let mut fitness: f64 = 1.0;
+	pub fn calc_fitness(&mut self) {
+		for i in 0..self.pop_size {
+			let mut frozen_lake = FrozenLake::new();
+			while !frozen_lake.is_game_over() {
+				let left = frozen_lake.get_left();
+				let right = frozen_lake.get_right();
+				let up = frozen_lake.get_up();
+				let down = frozen_lake.get_down();
 
-                        let mut outputs = self.population[i].feed_forward(vec![0.0, 0.0]).unwrap();
-                        if outputs[0] > outputs[1] {
-                                fitness += 1.0;
-                        }
+				let mut inputs = Vec::new();
 
-                        outputs = self.population[i].feed_forward(vec![0.0, 1.0]).unwrap();
-                        if outputs[1] > outputs[0] {
-                                fitness += 1.0;
-                        }
+				// input 1
+				if left == 'F' || left == 'S' {
+					inputs.push(1.0);
+				} else {
+					inputs.push(0.0);
+				}
 
-                        outputs = self.population[i].feed_forward(vec![1.0, 0.0]).unwrap();
-                        if outputs[1] > outputs[0] {
-                                fitness += 1.0;
-                        }
+				// input 2
+				if left == 'H' {
+					inputs.push(1.0);
+				} else {
+					inputs.push(0.0);
+				}
 
-                        outputs = self.population[i].feed_forward(vec![1.0, 1.0]).unwrap();
-                        if outputs[0] > outputs[1] {
-                                fitness += 1.0;
-                        }
+				//input 3
+				if left == 'G' {
+					inputs.push(1.0);
+				} else {
+					inputs.push(0.0);
+				}
 
-                        self.pop_fitness[i] = fitness.exp2();
+				// input 4
+				if right == 'F' || right == 'S' {
+					inputs.push(1.0);
+				} else {
+					inputs.push(0.0);
+				}
 
-                        if fitness.exp2() > self.best_fitness {
-                                self.best_fitness = fitness.exp2();
-                        }
+				// input 5
+				if right == 'H' {
+					inputs.push(1.0);
+				} else {
+					inputs.push(0.0);
+				}
 
-                        // solved the problem
-                        if self.pop_fitness[i] == 32.0 {
-                                self.has_solved = true;
-                                self.best_individual = self.population[i].clone();
-                        }
-                }
-        }
+				//input 6
+				if right == 'G' {
+					inputs.push(1.0);
+				} else {
+					inputs.push(0.0);
+				}
 
-        pub fn produce_new_gen(&mut self) {
-                self.generation += 1;
-                let mut new_population: Vec<NN> = Vec::new();
+				// input 7
+				if up == 'F' || up == 'S' {
+					inputs.push(1.0);
+				} else {
+					inputs.push(0.0);
+				}
 
-                for _i in 0..self.pop_size {
-                        let mut parent1: usize = 0;
-                        let mut parent2: usize = 0;
-                        let mut found_parent1 = false;
-                        let mut found_parent2 = false;
+				// input 8
+				if up == 'H' {
+					inputs.push(1.0);
+				} else {
+					inputs.push(0.0);
+				}
 
-                        while !found_parent1 {
-                                let random_index = rand::random::<usize>() % self.pop_size;
-                                let accept_reject = rand::random::<f64>() * self.best_fitness;
+				//input 9
+				if up == 'G' {
+					inputs.push(1.0);
+				} else {
+					inputs.push(0.0);
+				}
 
-                                if accept_reject < self.pop_fitness[random_index] {
-                                        found_parent1 = true;
-                                        parent1 = random_index;
-                                }
-                        }
+				// input 10
+				if down == 'F' || down == 'S' {
+					inputs.push(1.0);
+				} else {
+					inputs.push(0.0);
+				}
 
-                        while !found_parent2 {
-                                let random_index = rand::random::<usize>() % self.pop_size;
-                                let accept_reject = rand::random::<f64>() * self.best_fitness;
+				// input 11
+				if down == 'H' {
+					inputs.push(1.0);
+				} else {
+					inputs.push(0.0);
+				}
 
-                                if accept_reject < self.pop_fitness[random_index] {
-                                        found_parent2 = true;
-                                        parent2 = random_index;
-                                }
-                        }
+				//input 12
+				if down == 'G' {
+					inputs.push(1.0);
+				} else {
+					inputs.push(0.0);
+				}
 
-                        new_population.push(self.population[parent1].crossover(self.population[parent2].clone()));
-                }
-                self.population = new_population;
-        }
+				inputs.push(frozen_lake.get_x_diff_from_g());
+				inputs.push(frozen_lake.get_y_diff_from_g());
+
+				let outputs = self.population[i].feed_forward(inputs).unwrap();
+				let up_d = outputs[0];
+				let down_d = outputs[1];
+				let left_d = outputs[2];
+				let right_d = outputs[3];
+
+				let mut direction = Direction::Left;
+
+				if up_d >= down_d && up_d >= left_d && up_d >= right_d {
+					direction = Direction::Up;
+				} else if down_d >= up_d && down_d >= left_d && down_d >= right_d {
+					direction = Direction::Down;
+				} else if left_d >= up_d && left_d >= down_d && left_d >= right_d {
+					direction = Direction::Left;
+				} else if right_d >= up_d && right_d >= down_d && right_d >= left_d {
+					direction = Direction::Right;
+				}
+
+				frozen_lake.move_player(direction);
+			}
+			let mut fitness: f64 = 8.0 - frozen_lake.get_x_diff_from_g().abs() - frozen_lake.get_y_diff_from_g().abs();
+			fitness = fitness.exp2() + frozen_lake.get_num_moves() as f64;
+
+			self.pop_fitness[i] = fitness;
+
+			if fitness > self.best_fitness {
+				self.best_fitness = fitness;
+				self.best_individual = self.population[i].clone();
+			}
+
+			if fitness >= 256.0 {
+				self.has_solved = true;
+			}
+		}
+	}
+
+	pub fn play_best_individual(&mut self) {
+		let mut frozen_lake = FrozenLake::new();
+		frozen_lake.print_board();
+		while !frozen_lake.is_game_over() {
+			let left = frozen_lake.get_left();
+			let right = frozen_lake.get_right();
+			let up = frozen_lake.get_up();
+			let down = frozen_lake.get_down();
+
+			let mut inputs = Vec::new();
+
+			// input 1
+			if left == 'F' || left == 'S' {
+				inputs.push(1.0);
+			} else {
+				inputs.push(0.0);
+			}
+
+			// input 2
+			if left == 'H' {
+				inputs.push(1.0);
+			} else {
+				inputs.push(0.0);
+			}
+
+			//input 3
+			if left == 'G' {
+				inputs.push(1.0);
+			} else {
+				inputs.push(0.0);
+			}
+
+			// input 4
+			if right == 'F' || right == 'S' {
+				inputs.push(1.0);
+			} else {
+				inputs.push(0.0);
+			}
+
+			// input 5
+			if right == 'H' {
+				inputs.push(1.0);
+			} else {
+				inputs.push(0.0);
+			}
+
+			//input 6
+			if right == 'G' {
+				inputs.push(1.0);
+			} else {
+				inputs.push(0.0);
+			}
+
+			// input 7
+			if up == 'F' || up == 'S' {
+				inputs.push(1.0);
+			} else {
+				inputs.push(0.0);
+			}
+
+			// input 8
+			if up == 'H' {
+				inputs.push(1.0);
+			} else {
+				inputs.push(0.0);
+			}
+
+			//input 9
+			if up == 'G' {
+				inputs.push(1.0);
+			} else {
+				inputs.push(0.0);
+			}
+
+			// input 10
+			if down == 'F' || down == 'S' {
+				inputs.push(1.0);
+			} else {
+				inputs.push(0.0);
+			}
+
+			// input 11
+			if down == 'H' {
+				inputs.push(1.0);
+			} else {
+				inputs.push(0.0);
+			}
+
+			//input 12
+			if down == 'G' {
+				inputs.push(1.0);
+			} else {
+				inputs.push(0.0);
+			}
+
+			inputs.push(frozen_lake.get_x_diff_from_g());
+			inputs.push(frozen_lake.get_y_diff_from_g());
+
+			let outputs = self.best_individual.feed_forward(inputs).unwrap();
+			let up_d = outputs[0];
+			let down_d = outputs[1];
+			let left_d = outputs[2];
+			let right_d = outputs[3];
+
+			let mut direction = Direction::Left;
+
+			if up_d >= down_d && up_d >= left_d && up_d >= right_d {
+				direction = Direction::Up;
+			} else if down_d >= up_d && down_d >= left_d && down_d >= right_d {
+				direction = Direction::Down;
+			} else if left_d >= up_d && left_d >= down_d && left_d >= right_d {
+				direction = Direction::Left;
+			} else if right_d >= up_d && right_d >= down_d && right_d >= left_d {
+				direction = Direction::Right;
+			}
+
+			frozen_lake.move_player(direction);
+			thread::sleep(time::Duration::new(2, 0));
+			frozen_lake.print_board();
+		}
+	}
+
+	pub fn produce_new_gen(&mut self) {
+		self.generation += 1;
+		let mut new_population: Vec<NN> = Vec::new();
+
+		for _i in 0..self.pop_size {
+			let mut parent1: usize = 0;
+			let mut parent2: usize = 0;
+			let mut found_parent1 = false;
+			let mut found_parent2 = false;
+
+			while !found_parent1 {
+				let random_index = rand::random::<usize>() % self.pop_size;
+				let accept_reject = rand::random::<f64>() * self.best_fitness;
+
+				if accept_reject < self.pop_fitness[random_index] {
+					found_parent1 = true;
+					parent1 = random_index;
+				}
+			}
+
+			while !found_parent2 {
+				let random_index = rand::random::<usize>() % self.pop_size;
+				let accept_reject = rand::random::<f64>() * self.best_fitness;
+
+				if accept_reject < self.pop_fitness[random_index] {
+					found_parent2 = true;
+					parent2 = random_index;
+				}
+			}
+
+			new_population.push(self.population[parent1].crossover(self.population[parent2].clone()));
+		}
+		self.population = new_population;
+	}
 }
