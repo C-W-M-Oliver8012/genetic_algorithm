@@ -7,6 +7,7 @@ pub struct Population {
         pop_size: usize,
         generation: usize,
         best_individual: NN,
+        best_fitness: f64,
         has_solved: bool,
 }
 
@@ -18,6 +19,7 @@ impl Population {
                         pop_size: pop_size,
                         generation: 0,
                         best_individual: NN::new(nn_info.clone()),
+                        best_fitness: 0.0,
                         has_solved: false,
                 };
 
@@ -81,6 +83,10 @@ impl Population {
 
                         self.pop_fitness[i] = fitness.exp2();
 
+                        if fitness.exp2() > self.best_fitness {
+                                self.best_fitness = fitness.exp2();
+                        }
+
                         // solved the problem
                         if self.pop_fitness[i] == 32.0 {
                                 self.has_solved = true;
@@ -101,7 +107,7 @@ impl Population {
 
                         while !found_parent1 {
                                 let random_index = rand::random::<usize>() % self.pop_size;
-                                let accept_reject = rand::random::<f64>() * 32.0;
+                                let accept_reject = rand::random::<f64>() * self.best_fitness;
 
                                 if accept_reject < self.pop_fitness[random_index] {
                                         found_parent1 = true;
@@ -111,7 +117,7 @@ impl Population {
 
                         while !found_parent2 {
                                 let random_index = rand::random::<usize>() % self.pop_size;
-                                let accept_reject = rand::random::<f64>() * 32.0;
+                                let accept_reject = rand::random::<f64>() * self.best_fitness;
 
                                 if accept_reject < self.pop_fitness[random_index] {
                                         found_parent2 = true;
