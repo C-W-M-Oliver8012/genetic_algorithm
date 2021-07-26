@@ -5,7 +5,7 @@ pub mod frozen_lake;
 use crate::population::Population;
 
 fn main() {
-	let mut population = Population::new(vec![14, 12, 12, 12, 8, 4], 50);
+	let mut population = Population::new(vec![14, 4], 50);
 
 	while !population.get_has_solved() {
 		population.calc_fitness();
