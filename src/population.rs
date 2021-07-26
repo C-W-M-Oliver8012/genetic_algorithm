@@ -70,92 +70,20 @@ impl Population {
 
 				let mut inputs = Vec::new();
 
-				// input 1
-				if left == 'F' || left == 'S' {
-					inputs.push(1.0);
-				} else {
-					inputs.push(0.0);
-				}
-
-				// input 2
-				if left == 'H' {
-					inputs.push(1.0);
-				} else {
-					inputs.push(0.0);
-				}
-
-				//input 3
-				if left == 'G' {
-					inputs.push(1.0);
-				} else {
-					inputs.push(0.0);
-				}
-
-				// input 4
-				if right == 'F' || right == 'S' {
-					inputs.push(1.0);
-				} else {
-					inputs.push(0.0);
-				}
-
-				// input 5
-				if right == 'H' {
-					inputs.push(1.0);
-				} else {
-					inputs.push(0.0);
-				}
-
-				//input 6
-				if right == 'G' {
-					inputs.push(1.0);
-				} else {
-					inputs.push(0.0);
-				}
-
-				// input 7
-				if up == 'F' || up == 'S' {
-					inputs.push(1.0);
-				} else {
-					inputs.push(0.0);
-				}
-
-				// input 8
-				if up == 'H' {
-					inputs.push(1.0);
-				} else {
-					inputs.push(0.0);
-				}
-
-				//input 9
-				if up == 'G' {
-					inputs.push(1.0);
-				} else {
-					inputs.push(0.0);
-				}
-
-				// input 10
-				if down == 'F' || down == 'S' {
-					inputs.push(1.0);
-				} else {
-					inputs.push(0.0);
-				}
-
-				// input 11
-				if down == 'H' {
-					inputs.push(1.0);
-				} else {
-					inputs.push(0.0);
-				}
-
-				//input 12
-				if down == 'G' {
-					inputs.push(1.0);
-				} else {
-					inputs.push(0.0);
-				}
-
-				inputs.push(frozen_lake.get_x_diff_from_g());
-				inputs.push(frozen_lake.get_y_diff_from_g());
+				inputs.push((left == 'F' || left == 'S') as i64 as f64); // input 1
+				inputs.push((left == 'H') as i64 as f64); // input 2
+				inputs.push((left == 'G') as i64 as f64); //input 3
+				inputs.push((right == 'F' || right == 'S') as i64 as f64); // input 4
+				inputs.push((right == 'H') as i64 as f64); // input 5
+				inputs.push((right == 'G') as i64 as f64); // input 6
+				inputs.push((up == 'F' || up == 'S') as i64 as f64); // input 7
+				inputs.push((up == 'H') as i64 as f64); // input 8
+				inputs.push((up == 'G') as i64 as f64); // input 9
+				inputs.push((down == 'F' || down == 'S') as i64 as f64); // input 10
+				inputs.push((down == 'H') as i64 as f64); // input 11
+				inputs.push((down == 'G') as i64 as f64); // input 12
+				inputs.push(frozen_lake.get_x_diff_from_g()); // input 13
+				inputs.push(frozen_lake.get_y_diff_from_g()); // input 14
 
 				let outputs = self.population[i].feed_forward(inputs).unwrap();
 				let up_d = outputs[0];
@@ -204,92 +132,20 @@ impl Population {
 
 			let mut inputs = Vec::new();
 
-			// input 1
-			if left == 'F' || left == 'S' {
-				inputs.push(1.0);
-			} else {
-				inputs.push(0.0);
-			}
-
-			// input 2
-			if left == 'H' {
-				inputs.push(1.0);
-			} else {
-				inputs.push(0.0);
-			}
-
-			//input 3
-			if left == 'G' {
-				inputs.push(1.0);
-			} else {
-				inputs.push(0.0);
-			}
-
-			// input 4
-			if right == 'F' || right == 'S' {
-				inputs.push(1.0);
-			} else {
-				inputs.push(0.0);
-			}
-
-			// input 5
-			if right == 'H' {
-				inputs.push(1.0);
-			} else {
-				inputs.push(0.0);
-			}
-
-			//input 6
-			if right == 'G' {
-				inputs.push(1.0);
-			} else {
-				inputs.push(0.0);
-			}
-
-			// input 7
-			if up == 'F' || up == 'S' {
-				inputs.push(1.0);
-			} else {
-				inputs.push(0.0);
-			}
-
-			// input 8
-			if up == 'H' {
-				inputs.push(1.0);
-			} else {
-				inputs.push(0.0);
-			}
-
-			//input 9
-			if up == 'G' {
-				inputs.push(1.0);
-			} else {
-				inputs.push(0.0);
-			}
-
-			// input 10
-			if down == 'F' || down == 'S' {
-				inputs.push(1.0);
-			} else {
-				inputs.push(0.0);
-			}
-
-			// input 11
-			if down == 'H' {
-				inputs.push(1.0);
-			} else {
-				inputs.push(0.0);
-			}
-
-			//input 12
-			if down == 'G' {
-				inputs.push(1.0);
-			} else {
-				inputs.push(0.0);
-			}
-
-			inputs.push(frozen_lake.get_x_diff_from_g());
-			inputs.push(frozen_lake.get_y_diff_from_g());
+			inputs.push((left == 'F' || left == 'S') as i64 as f64); // input 1
+			inputs.push((left == 'H') as i64 as f64); // input 2
+			inputs.push((left == 'G') as i64 as f64); //input 3
+			inputs.push((right == 'F' || right == 'S') as i64 as f64); // input 4
+			inputs.push((right == 'H') as i64 as f64); // input 5
+			inputs.push((right == 'G') as i64 as f64); // input 6
+			inputs.push((up == 'F' || up == 'S') as i64 as f64); // input 7
+			inputs.push((up == 'H') as i64 as f64); // input 8
+			inputs.push((up == 'G') as i64 as f64); // input 9
+			inputs.push((down == 'F' || down == 'S') as i64 as f64); // input 10
+			inputs.push((down == 'H') as i64 as f64); // input 11
+			inputs.push((down == 'G') as i64 as f64); // input 12
+			inputs.push(frozen_lake.get_x_diff_from_g()); // input 13
+			inputs.push(frozen_lake.get_y_diff_from_g()); // input 14
 
 			let outputs = self.best_individual.feed_forward(inputs).unwrap();
 			let up_d = outputs[0];
