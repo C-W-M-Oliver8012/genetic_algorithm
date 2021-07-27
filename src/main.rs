@@ -1,10 +1,13 @@
 pub mod nn;
 pub mod population;
 pub mod frozen_lake;
+pub mod snake;
 
 use crate::population::Population;
+use crate::snake::Snake;
 
 fn main() {
+	/*
 	let mut population = Population::new(vec![14, 4], 50);
 
 	while !population.get_has_solved() {
@@ -16,4 +19,8 @@ fn main() {
 	println!("Solved in {} generations.", population.get_generation());
 	population.play_best_individual();
 	//population.print_best_individual();
+	*/
+
+	let mut snake = Snake::new();
+	snake.play_game();
 }
